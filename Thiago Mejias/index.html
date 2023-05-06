@@ -113,7 +113,7 @@
             this.id = id;
             this.nombre = nombre;
             this.apellido = apellido;
-            this.edad = edad;
+            this.edad = parseInt(edad);
         }
         toString() {
             return `ID: ${this.id}, Nombre: ${this.nombre}, Apellido: ${this.apellido}, Edad: ${this.edad}`;
@@ -183,6 +183,7 @@
         const arraySinFiltrar = listaDeObjetos;
         const filtro = $("filtro");
         let arrayFiltrado = [];
+        debugger
         arrayFiltrado = arraySinFiltrar.filter((obj) => {
             return filtro.value === "villanos" ? obj instanceof Villano :
                 filtro.value === "heroes" ? obj instanceof Heroe : true;
@@ -199,7 +200,8 @@
 
     // #region c
     function calcularPromedio() {
-        var listaQueEstaEnPantalla = filtrarListaDeObjetos();
+        var listaQueEstaEnPantalla = filtrarListaDeObjetos(false);
+        debugger
         const acumulador = listaQueEstaEnPantalla.reduce((acumulador, item) => {
             return acumulador + item.edad;
         }, 0)
@@ -396,7 +398,7 @@
 
             $("btn-modificar").classList.toggle("frm-oculto");
             $("btn-eliminar").classList.toggle("frm-oculto");
-            $("btn-agregar").classList.remove("frm-oculto");
+            $("btn-aceptar").classList.remove("frm-oculto");
             mostrarForms();
             cargarTabla(listaDeObjetos);
             cargarCheckBox(listaDeObjetos);
@@ -435,7 +437,7 @@
 
     function modificarObjetoPorId(lista, id, nuevoObjeto) {
 
-        // usaria find pero para usar una de las funciones que pide
+        
         const objeto = lista.filter((elemento) => elemento.id == id)[0];
 
         if (objeto) {
