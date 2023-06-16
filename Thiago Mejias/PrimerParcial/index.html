@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Document</title>
+
+    <script>
+        var listaDeObjetos = [];
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        window.addEventListener('load', function () {
+            var datosString = '[{"id":1, "nombre":"Clark", "apellido":"Kent", "edad":45, "alterego":"Superman", "ciudad":"Metropolis", "publicado":2002},{"id":2, "nombre":"Bruce", "apellido":"Wayne", "edad":35, "alterego":"Batman", "ciudad":"Gotica", "publicado":20012},{"id":3, "nombre":"Bart", "apellido":"Alen", "edad":30, "alterego":"Flash", "ciudad":"Central", "publicado":2017},{"id":4, "nombre":"Lex", "apellido":"Luthor", "edad":18, "enemigo":"Superman", "robos":500, "asesinatos":7},{"id":5, "nombre":"Harvey", "apellido":"Dent", "edad":20, "enemigo":"Batman", "robos":750, "asesinatos":2},{"id":666, "nombre":"Celina", "apellido":"kyle", "edad":23, "enemigo":"Batman", "robos":25, "asesinatos":1}]';
+
+
+            listaDeObjetos = generarArrayObjetos(datosString);
+            filtrarListaDeObjetos(listaDeObjetos);
+            $("filtro").addEventListener('change', filtrarListaDeObjetos);
+            $("agregarPor").addEventListener('change', mostrarTxtSegunFiltro);
+            $("btn-calcular").addEventListener('click', calcularPromedio);
+            $("btn-agregar").addEventListener('click', mostrarABMAgregar);
+            $("btn-cancelar").addEventListener('click', cancelarClick);
+            $("btn-aceptar").addEventListener('click', aceptarClick);
+            $("btn-eliminar").addEventListener('click', eliminarClick);
+            $("btn-modificar").addEventListener('click', modificarClick);
+
+
+        });
+
+
+
+
+
+    </script>
+
+</head>
+
+<body>
+    <div id="containerForm" class="container_form">
+        <h2 class="titulo-form">Formulario de Datos</h2>
+
+
+        <div class="container-data">
+            <div class="container_filtro">
+                <label class="label-estilos" for="filtro">Filtrar por:</label>
+                <select id="filtro" class="select-estilos">
+                    <option value="todos">Todos</option>
+                    <option value="villanos">Villanos</option>
+                    <option value="heroes">Heroes</option>
+                </select>
+            </div>
+
+
+
+            <div>
+                <label class="label-estilos" for="calcular-edad">Calcular edad promedio:</label>
+                <input type="text" class="textbox-estilos" id="calcular-edad" readonly>
+                <button id="btn-calcular">Calcular</button>
+            </div>
+            <div>
+                <label class="label-estilos" for="">Mostrar Columnas:</label>
+                <br>
+                <div id="container-checkBox"></div>
+            </div>
+        </div>
+        <div id="table-container" class="container_tabla">
+
+        </div>
+
+        <div>
+            <button id="btn-agregar" class="btn-confirmar">Agregar</button>
+        </div>
+
+
+    </div>
+
+
+    <div id="containerABM" class="frm-oculto container_form">
+        <h2 class="titulo-form"> Formulario ABM</h2>
+
+        <div class="containerControles">
+
+            <div class="container_filtro">
+                <label class="label-estilos" for="filtro">Tipo:</label>
+                <select id="agregarPor">
+                    <option value="Villano">Villano</option>
+                    <option value="Heroe">Heroe</option>
+                </select>
+            </div>
+
+            <div id="containerTxt" class="container_txt"></div>
+        </div>
+
+        <div class="container_botones">
+            <button id="btn-aceptar" class="btn-confirmar">Alta</button>
+            <button id="btn-modificar" class="btn-modificar frm-oculto">Modificar</button>
+            <button id="btn-eliminar" class="btn-cancelar frm-oculto">Eliminar</button>
+            <button id="btn-cancelar" class="btn-cancelar">Cancelar</button>
+        </div>
+    </div>
+
+
+</body>
+<script>
+
+    class Persona {
+        constructor(id, nombre, apellido, edad) {
+            this.id = id;
+            this.nombre = nombre;
+            this.apellido = apellido;
+            this.edad = parseInt(edad);
+        }
+        toString() {
+            return `ID: ${this.id}, Nombre: ${this.nombre}, Apellido: ${this.apellido}, Edad: ${this.edad}`;
+        }
+        toJson() {
+            return JSON.stringify({
+                id: this.id,
+                nombre: this.nombre,
+                apellido: this.apellido,
+                edad: this.edad,
+            });
+        }
+    }
+
+    class Heroe extends Persona {
+        constructor(id, nombre, apellido, edad, alterEgo, ciudad, publicado) {
+            super(id, nombre, apellido, edad);
+            this.alterEgo = alterEgo;
+            this.ciudad = ciudad;
+            this.publicado = publicado;
+
+        }
+        toString() {
+            return `${super.toString()}, {alterEgo: ${this.alterEgo}, ciudad: ${this.ciudad}, publicado: ${this.publicado}`;
+        }
+        toJson() {
+            const personaJson = super.toJson();
+            const heroeJSON = JSON.stringify({
+                alterEgo: this.alterEgo,
+                ciudad: this.ciudad,
+                publicado: this.publicado
+            });
+            return Object.assign({}, JSON.parse(personaJson), JSON.parse(heroeJSON));
+        }
+    }
+
+    class Villano extends Persona {
+        constructor(id, nombre, apellido, edad, enemigo, asesinatos, robos) {
+            super(id, nombre, apellido, edad);
+            this.enemigo = enemigo;
+            this.asesinatos = asesinatos;
+            this.robos = robos;
+
+        }
+        toString() {
+            return `${super.toString()}, {enemigo: ${this.enemigo}, asesinatos: ${this.asesinatos}, robos:${this.robos} `;
+        }
+        toJson() {
+            const personaJson = super.toJson();
+            const villanoJson = JSON.stringify({
+                enemigo: this.enemigo,
+                asesinatos: this.asesinatos,
+                robos: this.robos
+            });
+            return Object.assign({}, JSON.parse(personaJson), JSON.parse(villanoJson));
+        }
+    }
+
+
+
+
+
+
+    // #region b
+    function filtrarListaDeObjetos(carga = true) {
+
+        const arraySinFiltrar = listaDeObjetos;
+        const filtro = $("filtro");
+        let arrayFiltrado = [];
+        debugger
+        arrayFiltrado = arraySinFiltrar.filter((obj) => {
+            return filtro.value === "villanos" ? obj instanceof Villano :
+                filtro.value === "heroes" ? obj instanceof Heroe : true;
+        });
+        if (carga) {
+            cargarCheckBox(arrayFiltrado);
+            cargarTabla(arrayFiltrado);
+        }
+
+        return arrayFiltrado;
+
+    }
+    // #endRegion
+
+    // #region c
+    function calcularPromedio() {
+        var listaQueEstaEnPantalla = filtrarListaDeObjetos(false);
+        debugger
+        const acumulador = listaQueEstaEnPantalla.reduce((acumulador, item) => {
+            return acumulador + item.edad;
+        }, 0)
+        resultado = acumulador / listaDeObjetos.length;
+        $("calcular-edad").value = resultado;
+    }
+    // #endregion
+
+    // #region d
+
+
+    function mostrarForms() {
+        alternarVisibilidadForm();
+        alternarVisibilidadFormABM();
+    }
+
+
+    function mostrarABMAgregar(persona, cargarModifcar = false) {
+
+        cargarTxt(listaDeObjetos);
+        $("txtid").readOnly = true;
+        limpiarFormModificar();
+        tipo = $("agregarPor").value;
+
+        if (cargarModifcar) {
+            $("btn-modificar").classList.toggle("frm-oculto");
+            $("btn-eliminar").classList.toggle("frm-oculto");
+            $("btn-aceptar").classList.toggle("frm-oculto");
+            tipo = persona.constructor === Emlpea ? "Heroe"
+                : persona.constructor === Cliente ? "Villano" : "Persona";
+            $("agregarPor").value = tipo;
+            cargarFormModificar(persona);
+        }
+
+
+        filtrarTxt(tipo);
+        mostrarForms();
+    }
+
+    function cargarFormDesdeTd() {
+
+        const tr = this.parentNode;
+        const objeto = listaDeObjetos.find(item => {
+            return tr.id == item.id;
+        });
+        mostrarABMAgregar(objeto, true);
+
+    }
+
+    function limpiarFormModificar() {
+        $("txtid").value = "";
+        $("txtnombre").value = "";
+        $("txtapellido").value = "";
+        $("txtedad").value = "";
+        $("txtalterEgo").value = "";
+        $("txtasesinatos").value = "";
+        $("txtciudad").value = "";
+        $("txtenemigo").value = "";
+        $("txtrobos").value = "";
+        $("txtpublicado").value = "";
+        $("agregarPor").removeAttribute("disabled");
+
+    }
+
+    function cargarFormModificar(persona) {
+
+        $("txtid").value = persona.id;
+        $("txtnombre").value = persona.nombre;
+        $("txtapellido").value = persona.apellido;
+        $("txtedad").value = persona.edad;
+        $("agregarPor").setAttribute("disabled", "true");
+
+        if (persona.constructor === Heroe) {
+            $("txtalterEgo").value = persona.alterEgo;
+            $("txtciudad").value = persona.ciudad;
+            $("txtpublicado").value = persona.publicado;
+        } else if (persona.constructor === Villano) {
+            $("txtenemigo").value = persona.enemigo;
+            $("txtrobos").value = persona.robos;
+            $("txtasesinatos").value = persona.asesinatos;
+        }
+
+    }
+
+
+    function alternarVisibilidadFormABM() {
+        $("containerABM").classList.toggle("frm-oculto");
+        // $("containerABM").classList.toggle("container_form_ABM");
+    }
+
+    function alternarVisibilidadForm() {
+        $("containerForm").classList.toggle("frm-oculto");
+        // $("containerForm").classList.toggle("container_form");
+
+    }
+
+    function cargarTxt(arrayDeObjetos) {
+        const container = $("containerTxt");
+        if (!container.hasChildNodes()) {
+            const keys = getKeys(arrayDeObjetos);
+
+            keys.forEach(key => {
+                const div = document.createElement("div");
+                div.classList.add("controles-inputs");
+                div.id = "div" + key;
+                const txtBox = document.createElement("input");
+                txtBox.type = "text";
+                txtBox.id = "txt" + key;
+
+                const label = document.createElement("label");
+                label.textContent = key + ":";
+                div.appendChild(label);
+                div.appendChild(txtBox);
+
+                container.appendChild(div);
+            });
+        }
+    }
+
+    function mostrarTxtSegunFiltro() {
+        let valor = this.value;
+        filtrarTxt(valor)
+    }
+
+    function filtrarTxt(tipo) {
+
+        const containerTxt = $("containerTxt");
+        $("divenemigo").classList.remove("frm-oculto");
+        $("divrobos").classList.remove("frm-oculto");
+        $("divciudad").classList.remove("frm-oculto");
+        $("divalterEgo").classList.remove("frm-oculto");
+        $("divasesinatos").classList.remove("frm-oculto");
+        $("divpublicado").classList.remove("frm-oculto");
+
+        if (tipo == "Heroe") {
+            $("divenemigo").classList.add("frm-oculto");
+            $("divrobos").classList.add("frm-oculto");
+            $("divasesinatos").classList.add("frm-oculto");
+        } else if (tipo == "Villano") {
+            $("divciudad").classList.add("frm-oculto");
+            $("divalterEgo").classList.add("frm-oculto");
+            $("divpublicado").classList.add("frm-oculto");
+        } else {
+            $("divpublicado").classList.add("frm-oculto");
+            $("divasesinatos").classList.add("frm-oculto");
+            $("divciudad").classList.add("frm-oculto");
+            $("divalterEgo").classList.add("frm-oculto");
+            $("divenemigo").classList.add("frm-oculto");
+            $("divrobos").classList.add("frm-oculto");
+        }
+    }
+    // #endregion
+
+
+
+
+    // #region e
+
+
+
+    function aceptarClick() {
+
+        if (validacionGeneral()) {
+            alert("Campos incorrecetos");
+        } else {
+            id = obtenerId(listaDeObjetos);
+            tipo = $("agregarPor").value;
+            persona = tipo == "Heroe" ?
+                new Heroe(id, $("txtnombre").value, $("txtapellido").value, $("txtedad").value, $("txtalterEgo").value, $("txtciudad").value, $("txtpublicado").value) :
+                new Villano(id, $("txtnombre").value, $("txtapellido").value, $("txtedad").value, $("txtenemigo").value, $("txtasesinatos").value, $("txtrobos").value,)
+
+            agregarObjeto(listaDeObjetos, persona);
+
+            mostrarForms();
+            cargarTabla(listaDeObjetos);
+            cargarCheckBox(listaDeObjetos);
+        }
+
+    }
+
+    function modificarClick() {
+        if (validacionGeneral()) {
+            alert("Campos incorrecetos");
+        } else {
+            idAModificar = $("txtid").value;
+            tipo = $("agregarPor").value;
+            persona = tipo == "Heroe" ?
+                new Heroe(id, $("txtnombre").value, $("txtapellido").value, $("txtedad").value, $("txtalterEgo").value, $("txtciudad").value, $("txtpublicado").value) :
+                new Villano(id, $("txtnombre").value, $("txtapellido").value, $("txtedad").value, $("txtenemigo").value, $("txtasesinatos").value, $("txtrobos").value,)
+
+            if (idAModificar && idAModificar.trim().length > 0) {
+                modificarObjetoPorId(listaDeObjetos, idAModificar, persona)
+            }
+
+            $("btn-modificar").classList.toggle("frm-oculto");
+            $("btn-eliminar").classList.toggle("frm-oculto");
+            $("btn-aceptar").classList.remove("frm-oculto");
+            mostrarForms();
+            cargarTabla(listaDeObjetos);
+            cargarCheckBox(listaDeObjetos);
+        }
+    }
+
+    function cancelarClick() {
+        mostrarForms();
+        $("btn-modificar").classList.add("frm-oculto");
+        $("btn-eliminar").classList.add("frm-oculto");
+        $("btn-aceptar").classList.remove("frm-oculto");
+
+    }
+    function eliminarClick(params) {
+
+        if (validacionGeneral()) {
+            alert("Campos incorrecetos");
+        } else {
+            idAEliminar = $("txtid").value;
+
+            if (idAEliminar && idAEliminar.trim().length > 0) {
+                eliminarObjetoPorId(listaDeObjetos, idAEliminar)
+            }
+
+            $("btn-modificar").classList.toggle("frm-oculto");
+            $("btn-eliminar").classList.toggle("frm-oculto");
+            $("btn-aceptar").classList.remove("frm-oculto");
+            mostrarForms();
+            cargarTabla(listaDeObjetos);
+            cargarCheckBox(listaDeObjetos);
+        }
+    }
+    function agregarObjeto(listaDeObjetos, objeto) {
+        listaDeObjetos.push(persona);
+    }
+
+    function modificarObjetoPorId(lista, id, nuevoObjeto) {
+
+        
+        const objeto = lista.filter((elemento) => elemento.id == id)[0];
+
+        if (objeto) {
+            const keys = Object.keys(objeto);
+
+            keys.forEach((key) => {
+                if (key != "id") {
+                    objeto[key] = nuevoObjeto[key];
+                }
+            });
+        }
+
+        return objeto || null;
+
+
+    }
+
+    function obtenerId(arrayDeObjetos) {
+        return arrayDeObjetos.reduce((max, obj) => (obj.id > max ? obj.id : max), arrayDeObjetos[0].id) + 1;
+    }
+
+    function eliminarObjetoPorId(lista, id) {
+        const index = lista.findIndex((elemento) => elemento.id == id);
+
+        if (index !== -1) {
+            lista.splice(index, 1);
+            return true;
+        }
+
+        return false;
+    }
+
+    //#endregion e
+
+
+    //#region  F
+
+    // VALIDACIONES 
+
+
+    function validacionGeneral() {
+
+
+        if ($("agregarPor").value == "Heroe") {
+            if (!validarNumero($("txtedad").value) || !validarPublicado($("txtpublicado").value) || !validarCampoVacio($("txtalterEgo").value) || !validarCampoVacio($("txtciudad").value) || !validarCampoVacio($("txtapellido").value)
+                || !validarCampoVacio($("txtnombre").value)) {
+                debugger
+                return true;
+            }
+
+        } else {
+            if (!validarNumero($("txtedad").value) || !validarNumero($("txtasesinatos").value) || !validarCampoVacio($("txtenemigo").value) || !validarNumero($("txtrobos").value) || !validarCampoVacio($("txtapellido").value)
+                || !validarCampoVacio($("txtnombre").value)) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+
+    function validarNumero(campoTexto) {
+        debugger
+        if (campoTexto === '')
+            return false;
+        if (isNaN(campoTexto))
+            return false;
+
+        var numero = parseFloat(campoTexto);
+        if (numero <= 0)
+            return false;
+
+        return true;
+    }
+
+    function validarPublicado(campoTexto) {
+        if (campoTexto === '')
+            return false;
+        if (isNaN(campoTexto))
+            return false;
+
+        var numero = parseFloat(campoTexto);
+        if (numero <= 1940)
+            return false;
+
+        return true;
+    }
+
+    function validarCampoVacio(campoTexto) {
+        debugger
+        if (campoTexto === null || campoTexto.trim() === '') {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
+
+
+    // #endRegion
+
+
+
+
+
+    //#region h
+
+
+    function ordenarPorHead() {
+
+
+        const tabla = $("table-container").firstChild;
+        $("filtro").selectedIndex = 0;
+        const columnaAOrdenar = this.id;
+        const td = tabla.querySelectorAll(`td#${columnaAOrdenar}`);
+        
+
+        let listaOrdenada = listaDeObjetos.map(obj => obj);
+     
+        if (columnaAOrdenar === "asesinatos" || columnaAOrdenar === "edad" || columnaAOrdenar === "enemigo" || columnaAOrdenar === "robos" || columnaAOrdenar === "publicado" || columnaAOrdenar === "id") {
+            listaOrdenada = listaOrdenada.sort((a, b) => {
+                const primerValor = a[columnaAOrdenar];
+                const segundoValor = b[columnaAOrdenar];
+                if (primerValor === undefined || segundoValor === undefined) {
+                    return 0;
+                }
+                return primerValor - segundoValor;
+            });
+        } else {
+            listaOrdenada = listaOrdenada.sort((a, b) => {
+                const primerValor = a[columnaAOrdenar];
+                const segundoValor = b[columnaAOrdenar];
+                if (primerValor === undefined || segundoValor === undefined) {
+                    return 0;
+                }
+                return primerValor.localeCompare(segundoValor);
+            });
+        }
+
+        cargarCheckBox(listaOrdenada);
+        cargarTabla(listaOrdenada);
+
+        return true;
+    }
+
+    //endregion h
+
+
+    // #region i
+    function actualizarColumnas() {
+        const tabla = $("table-container").firstChild;
+        const checkBoxes = Array.from($("container-checkBox").querySelectorAll('input[type="checkbox"]'));
+        const checkBoxesSeleccionados = checkBoxes.filter((checkBox) => checkBox.checked);
+
+        checkBoxes.forEach(check => {
+
+            const th = tabla.querySelectorAll(`th#${check.value}`);
+            const td = tabla.querySelectorAll(`td#${check.value}`);
+            if (th) {
+                th.forEach(th => {
+                    th.style.display = check.checked ? "table-cell" : "none";
+                })
+            }
+            if (td) {
+                td.forEach(td => {
+                    td.style.display = check.checked ? "table-cell" : "none";
+                })
+            }
+        });
+    }
+
+
+    // #endregion 
+
+
+
+
+
+
+
+
+    //#region funciones generador tablas
+
+    function cargarTabla(arrayDeObjetos) {
+        $("table-container").firstChild.remove();
+        $("table-container").appendChild(crearTabla(arrayDeObjetos));
+    }
+    function cargarCheckBox(arrayDeObjetos) {
+        const container = $("container-checkBox");
+        const keys = getKeys(arrayDeObjetos);
+
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+
+        keys.forEach(key => {
+            const checkBox = document.createElement("input");
+            checkBox.type = "checkbox";
+            checkBox.value = key;
+            checkBox.checked = true;
+            checkBox.addEventListener("change", actualizarColumnas);
+            const label = document.createElement("label");
+            label.textContent = key;
+            $("container-checkBox").appendChild(checkBox);
+            $("container-checkBox").appendChild(label);
+        });
+
+    }
+
+
+    function generarArrayObjetos(datosString) {
+        const arrayDeObjetos = [];
+
+        console.log(datosString);
+        JSON.parse(datosString).forEach(element => {
+            if (element.alterego !== undefined && element.ciudad !== undefined) {
+                empleado = new Heroe(element.id, element.nombre, element.apellido, element.edad,
+                    element.alterego, element.ciudad, element.publicado);
+                arrayDeObjetos.push(empleado)
+            } else if (element.enemigo !== undefined && element.robos !== undefined) {
+                cliente = new Villano(element.id, element.nombre, element.apellido, element.edad,
+                    element.enemigo, element.asesinatos, element.robos);
+                arrayDeObjetos.push(cliente)
+            } else {
+                persona = new Persona(element.id, element.nombre, element.apellido, element.edad);
+                arrayDeObjetos.push(persona);
+            }
+        });
+        return arrayDeObjetos;
+    }
+
+
+
+    function crearTabla(arrayDeObjetos) {
+
+        if (!Array.isArray(arrayDeObjetos)) return null;
+
+        if (arrayDeObjetos.length > 0) {
+            const tabla = document.createElement("table");
+            const thead = crearThead(arrayDeObjetos);
+            const tbody = crearTbody(arrayDeObjetos);
+            tabla.appendChild(thead);
+            tabla.appendChild(tbody);
+
+
+            return tabla;
+        }
+    }
+
+    function crearThead(arrayDeObjetos) {
+        const thead = document.createElement("thead");
+        const trThead = document.createElement("tr");
+        const keys = getKeys(arrayDeObjetos);
+
+        keys.forEach(key => {
+            const newTh = document.createElement("th");
+            const newBtn = document.createElement("button");
+            newBtn.addEventListener("click", ordenarPorHead)
+            newBtn.textContent = key;
+            newTh.setAttribute("id", key);
+            newBtn.setAttribute("id", key);
+            newTh.appendChild(newBtn);
+            trThead.appendChild(newTh);
+        });
+
+        thead.appendChild(trThead);
+
+        return thead;
+    }
+
+    function crearTbody(arrayDeObjetos) {
+        const tbody = document.createElement("tbody");
+        const keys = getKeys(arrayDeObjetos);
+
+        arrayDeObjetos.forEach(obj => {
+
+            const tr = document.createElement("tr");
+
+            tr.setAttribute("id", obj["id"]);
+
+            for (let key in keys) {
+                const newTd = document.createElement("td");
+                newTd.addEventListener("dblclick", cargarFormDesdeTd);
+                newTd.setAttribute("id", keys[key]);
+                if (obj.hasOwnProperty(keys[key])) {
+                    newTd.textContent = obj[keys[key]];
+                }
+                tr.appendChild(newTd);
+            }
+            tbody.appendChild(tr);
+        })
+        return tbody;
+    }
+
+    function getKeys(arrayDeObjetos) {
+        const keys = [];
+
+        arrayDeObjetos.forEach(obj => {
+            for (let key in obj) {
+                if (!keys.includes(key)) {
+                    keys.push(key);
+                }
+            }
+        })
+        return keys;
+    }
+    // #endregion funciones genericas
+
+
+
+
+
+
+
+
+</script>
+
+</html>
