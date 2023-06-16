@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+
+    <div id="overlay" class="overlay">
+        <div class="spinner"></div>
+      </div>
+
+    <div id="containerForm" class="container_form">
+        <h2 class="titulo-form">Formulario de Datos</h2>
+        <div id="table-container">
+
+        </div>
+
+        <button id="btn-agregar" class="btn-confirmar">Agregar Elemento</button>
+    </div>
+
+
+
+    <div id="containerABM" class="frm-oculto container_form">
+        <h2 class="titulo-form" id="titulo-form"> Formulario ABM</h2>
+
+        <div class="containerControles">
+
+            <div class="container_filtro">
+                <label class="label-estilos" for="filtro">Tipo:</label>
+                <select id="agregarPor">
+                    <option value="Aereo">Aereo</option>
+                    <option value="Terrestre">Terrestre</option>
+                </select>
+            </div>
+
+            <div id="containerTxt" class="container_txt"></div>
+        </div>
+
+        <div class="container_botones">
+            <button id="btn-aceptar" class="btn-confirmar">Aceptar</button>
+            <button id="btn-cancelar" class="btn-cancelar">Cancelar</button>
+        </div>
+    </div>
+    
+</body>
+
+<script src="index.js"></script>
+
+</html>
